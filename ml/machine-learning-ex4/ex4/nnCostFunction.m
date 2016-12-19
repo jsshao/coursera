@@ -72,6 +72,29 @@ J += lambda / 2 / m * (sum(sum(temp1.*temp1)) + sum(sum(temp2.*temp2)));
 %         Hint: We recommend implementing backpropagation using a for-loop
 %               over the training examples if you are implementing it for the 
 %               first time.
+
+Del1 = zeros(input_layer_size, hidden_layer_size)';
+Del2 = zeros(num_labels, hidden_layer_size);
+for t =1:m
+    a = X(t, :)';
+    z2 = Theta1 * a;
+    a2 = [1 ; sigmoid(z2)]; % hidden layer x 1
+    z3 = Theta2 * a2;
+    a3 = sigmoid(z3); % num labels x 1
+    yi = zeros(num_labels, 1);
+    yi(y(t)) = 1;
+    del3 = a3 - yi;
+    z2 = [1; z2];
+    del2 = Theta2' * del3 .* sigmoidGradient(z2);
+    Theta1_grad = Theta1_grad + del2(2:end)*a';
+    Theta2_grad = Theta2_grad + del3*a2';
+
+    Del1 = Del1 + del2(2:end)*a(2:end)';
+    Del2 = Del2 + del3*a2(2:end)';
+end
+Theta1_grad = Theta1_grad / m;
+Theta2_grad = Theta2_grad / m;
+
 %
 % Part 3: Implement regularization with the cost function and gradients.
 %
@@ -80,6 +103,12 @@ J += lambda / 2 / m * (sum(sum(temp1.*temp1)) + sum(sum(temp2.*temp2)));
 %               the regularization separately and then add them to Theta1_grad
 %               and Theta2_grad from Part 2.
 %
+temp = Theta1;
+temp(:, 1) = zeros(size(Theta1, 1), 1);
+Theta1_grad = Theta1_grad + lambda / m * temp;
+temp = Theta2;
+temp(:, 1) = zeros(size(Theta2, 1), 1);
+Theta2_grad = Theta2_grad + lambda / m * temp;
 
 
 
